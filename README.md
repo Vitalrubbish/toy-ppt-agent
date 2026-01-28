@@ -6,7 +6,7 @@ This project implements an AI agent system capable of generating high-quality pr
 
 *   Python 3.10+
 *   Node.js 18+
-*   OpenAI API Key
+*   API Key for your chosen LLM provider (DeepSeek, Moonshot, or OpenAI)
 
 ## Setup
 
@@ -28,13 +28,28 @@ This project implements an AI agent system capable of generating high-quality pr
     ```
 
 4.  Set up environment variables:
-    Create a `.env` file in the root directory:
+    Create a `.env` file in the root directory. Example (Editor=DeepSeek, Critic=Moonshot):
     ```
-    OPENAI_API_KEY=sk-your-api-key-here
-    # Optional: switch provider to DeepSeek
-    # LLM_PROVIDER=deepseek
-    # DEEPSEEK_API_KEY=sk-your-deepseek-key
-    # DEEPSEEK_BASE_URL=https://api.deepseek.com
+    EDITOR_LLM_PROVIDER=deepseek
+    EDITOR_LLM_MODEL=deepseek-chat
+    DEEPSEEK_API_KEY=sk-your-deepseek-key
+    DEEPSEEK_BASE_URL=https://api.deepseek.com
+
+    CRITIC_LLM_PROVIDER=moonshot
+    CRITIC_LLM_MODEL=moonshot-v1-8k
+    MOONSHOT_API_KEY=sk-your-moonshot-key
+    MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
+    ```
+
+    Optional:
+    ```
+    # Global defaults (used if EDITOR_/CRITIC_ not set)
+    # LLM_PROVIDER=openai
+    # LLM_MODEL=gpt-4o
+    # OPENAI_API_KEY=sk-your-openai-key
+
+    # Force vision on/off for providers that support it
+    # LLM_SUPPORTS_VISION=true
     ```
 
 ## Usage

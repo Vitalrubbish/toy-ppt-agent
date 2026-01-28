@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, List
 
 from src.agents.base_agent import BaseAgent
@@ -13,8 +14,9 @@ Follow Slidev syntax strictly and output valid Slidev markdown only.
 
 
 class EditorAgent(BaseAgent):
-    def __init__(self, model_name: str = "gpt-4o"):
-        super().__init__(role="Editor", model_name=model_name)
+    def __init__(self, model_name: str = "gpt-4o", provider: str | None = None):
+        provider = provider or os.getenv("EDITOR_LLM_PROVIDER") or "deepseek"
+        super().__init__(role="Editor", model_name=model_name, provider=provider)
         self.set_system_prompt(EDITOR_SYSTEM_PROMPT)
 
     def generate_draft(self, raw_content: str) -> str:

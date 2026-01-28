@@ -61,18 +61,28 @@ def run(
 
     raw_content = read_text_file(input_path)
 
-    provider = os.getenv("LLM_PROVIDER", "openai")
-    model_name = os.getenv("LLM_MODEL") or model_name
-    if not model_name:
-        model_name = "gpt-4o"
-    if os.getenv("LLM_MODEL") is None:
-        if provider == "deepseek":
-            model_name = "deepseek-chat"
-        elif provider == "moonshot":
-            model_name = "moonshot-v1-8k"
+    default_model = model_name or "gpt-4o"
 
-    editor = EditorAgent(model_name=model_name)
-    critic = CriticAgent(model_name=model_name)
+    editor_provider = os.getenv("EDITOR_LLM_PROVIDER") or os.getenv("LLM_PROVIDER", "openai")
+    critic_provider = os.getenv("CRITIC_LLM_PROVIDER") or os.getenv("LLM_PROVIDER", "openai")
+
+    editor_model = os.getenv("EDITOR_LLM_MODEL") or os.getenv("LLM_MODEL") or default_model
+    critic_model = os.getenv("CRITIC_LLM_MODEL") or os.getenv("LLM_MODEL") or default_model
+
+    if os.getenv("EDITOR_LLM_MODEL") is None and os.getenv("LLM_MODEL") is None:
+        if editor_provider == "deepseek":
+            editor_model = "deepseek-chat"
+        elif editor_provider == "moonshot":
+            editor_model = "moonshot-v1-8k"
+
+    if os.getenv("CRITIC_LLM_MODEL") is None and os.getenv("LLM_MODEL") is None:
+        if critic_provider == "deepseek":
+            critic_model = "deepseek-chat"
+        elif critic_provider == "moonshot":
+            critic_model = "moonshot-v1-8k"
+
+    editor = EditorAgent(model_name=editor_model, provider=editor_provider)
+    critic = CriticAgent(model_name=critic_model, provider=critic_provider)
     runner = SlidevRunner(work_dir=str(Path(__file__).resolve().parents[1]))
 
     current_dir = os.path.join(output_dir, "current")
