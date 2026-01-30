@@ -95,6 +95,10 @@ def run(
 
     feedback: List[dict] = []
     slides_md = ""
+    outline_md = ""
+    last_success_md = ""
+    last_render_error: str | None = None
+    need_fix = False
 
     run_stamp = time.strftime("%Y%m%d_%H%M%S")
     run_log_path = os.path.join(logs_dir, f"run_{run_stamp}.log")
@@ -105,11 +109,27 @@ def run(
             f.write(line)
         typer.echo(message)
 
+    append_run_log("Editor: generating outline")
+    outline_md = editor.generate_outline(raw_content)
+    outline_log_path = os.path.join(logs_dir, f"outline_{run_stamp}.md")
+    outline_path = os.path.join(current_dir, "outline.md")
+    write_text_file(outline_log_path, outline_md)
+    write_text_file(outline_path, outline_md)
+    append_run_log(f"Outline saved to {outline_path}")
+
+    if not typer.confirm("Outline generated. Start iteration?", default=True):
+        append_run_log("User stopped after outline generation.")
+        typer.echo(f"Outline saved at {outline_path}")
+        return
+
     for iteration in range(1, max_iterations + 1):
         append_run_log(f"Iteration {iteration}/{max_iterations} started")
         if iteration == 1:
             append_run_log("Editor: generating draft")
-            slides_md = editor.generate_draft(raw_content)
+            slides_md = editor.generate_draft(raw_content, outline=outline_md)
+        elif need_fix:
+            append_run_log("Editor: fixing slides after render error")
+            slides_md = editor.fix_slides(slides_md, last_render_error or "")
         else:
             append_run_log("Editor: refining slides")
             slides_md = editor.refine_slides(slides_md, feedback)
@@ -122,7 +142,8 @@ def run(
         append_run_log(f"Editor output saved to {editor_log_path}")
 
         slides_path = os.path.join(current_dir, "slides.md")
-        write_text_file(slides_path, slides_md)
+        candidate_path = os.path.join(current_dir, "slides_candidate.md")
+        write_text_file(candidate_path, slides_md)
         rendered_log_path = os.path.join(logs_dir, f"iter_{iteration}_rendered.md")
         write_text_file(rendered_log_path, slides_md)
         append_run_log(f"Rendered markdown saved to {rendered_log_path}")
@@ -132,12 +153,14 @@ def run(
         image_paths = []
         render_error = None
         try:
-            image_paths = runner.render_slides(slides_path, images_dir)
+            image_paths = runner.render_slides(candidate_path, images_dir)
         except RenderError as e:
             render_error = str(e)
             append_run_log("Render failed. Sending error back to editor for fixes")
 
         if render_error:
+            need_fix = True
+            last_render_error = render_error
             feedback = [
                 {
                     "issue": "Render Error",
@@ -149,6 +172,10 @@ def run(
             write_text_file(critic_log_path, json.dumps(feedback, ensure_ascii=False, indent=2))
             append_run_log(f"Render error logged to {critic_log_path}")
         else:
+            need_fix = False
+            last_render_error = None
+            last_success_md = slides_md
+            write_text_file(slides_path, slides_md)
             append_run_log(f"Rendered {len(image_paths)} slide images")
 
             append_run_log("Critic: reviewing slides")
@@ -160,7 +187,8 @@ def run(
 
         iter_dir = os.path.join(history_dir, f"iter_{iteration}")
         ensure_dir(iter_dir)
-        shutil.copy(slides_path, os.path.join(iter_dir, "slides.md"))
+        source_slides_path = slides_path if Path(slides_path).exists() else candidate_path
+        shutil.copy(source_slides_path, os.path.join(iter_dir, "slides.md"))
         if image_paths:
             images_history = os.path.join(iter_dir, "images")
             clear_dir(images_history)
@@ -176,6 +204,10 @@ def run(
             break
         append_run_log("Not approved. Continuing to next iteration.")
 
+    if last_success_md:
+        write_text_file(slides_path, last_success_md)
+    else:
+        write_text_file(slides_path, slides_md)
     elapsed = time.time() - start_time
     typer.echo(f"Done. Final slides at {current_dir}/slides.md")
     typer.echo(f"Elapsed: {elapsed:.2f}s")

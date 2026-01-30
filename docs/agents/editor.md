@@ -33,6 +33,11 @@
 > 2. Use Frontmatter for layout (e.g., `layout: two-cols`).
 > 3. Keep text concise. Use bullet points.
 > 4. Ensure code syntax is correct Slidev markdown.
+> 5. Always add a dedicated Title Slide as a standalone slide (first slide) for title, subtitle, author/affiliation, date.
+> 6. Do NOT assume the frontmatter will render as a title page. If a title page is required, create an explicit slide after the frontmatter.
+> 7. `layout` only works inside a slide’s frontmatter block. Place it immediately after `---`.
+> 8. Do not mix multiple layout declarations in a single slide; create a new slide instead.
+> 9. For two-column layouts, use `layout: 2-cols` and `::right::` blocks correctly.
 >
 > When receiving feedback, strictly follow the suggestions to fix visual issues (e.g., reducing word count, splitting slides).
 
