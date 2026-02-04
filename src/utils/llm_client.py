@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 from openai import APIConnectionError, APITimeoutError, RateLimitError, APIStatusError
-
+from openai.types.chat import ChatCompletionMessageParam
 
 @dataclass
 class LLMResponse:
@@ -51,7 +51,7 @@ class LLMClient:
 
     def chat_completion(
         self,
-        messages: List[Dict[str, Any]],
+        messages: List[ChatCompletionMessageParam],
         model: str,
         temperature: float = 0.7,
         json_mode: bool = False,
@@ -80,6 +80,16 @@ class LLMClient:
         if last_err:
             raise last_err
         raise RuntimeError("Unknown error in chat_completion")
+    
+    # Context Cost Calculation
+    @staticmethod
+    def calculate_context_cost(usage: Dict[str, Any]) -> float:
+        """Calculate context cost based on token usage."""
+        if not usage:
+            return 0.0
+        input_cost = usage.get("prompt_tokens", 0) * 0.000005
+        output_cost = usage.get("completion_tokens", 0) * 0.000015
+        return input_cost + output_cost
 
     @staticmethod
     def encode_image(image_path: str) -> str:

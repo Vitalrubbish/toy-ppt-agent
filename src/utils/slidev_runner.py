@@ -37,6 +37,7 @@ class SlidevRunner:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            encoding="utf-8",
         )
 
     def render_slides(self, md_file_path: str, output_dir: str) -> List[str]:
@@ -80,6 +81,7 @@ class SlidevRunner:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
                 shell=True,
             )
             if result.returncode == 0:
