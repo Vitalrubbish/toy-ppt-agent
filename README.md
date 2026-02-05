@@ -28,29 +28,24 @@ This project implements an AI agent system capable of generating high-quality pr
     ```
 
 4.  Set up environment variables:
-    Create a `.env` file in the root directory. Example (Editor=DeepSeek, Critic=Moonshot):
+    Create a `.env` file in the root directory. Example:
     ```
-    EDITOR_LLM_PROVIDER=deepseek
-    EDITOR_LLM_MODEL=deepseek-chat
-    DEEPSEEK_API_KEY=sk-your-deepseek-key
-    DEEPSEEK_BASE_URL=https://api.deepseek.com
+    LLM_PROVIDER=openai
+    LLM_MODEL=gpt-4o
 
-    CRITIC_LLM_PROVIDER=moonshot
-    CRITIC_LLM_MODEL=moonshot-v1-8k
-    MOONSHOT_API_KEY=sk-your-moonshot-key
-    MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
-    ```
+    OPENAI_API_KEY=sk-your-openai-key
+    OPENAI_BASE_URL=https://api.openai.com/v1
 
-    Optional:
-    ```
-    # Global defaults (used if EDITOR_/CRITIC_ not set)
-    # LLM_PROVIDER=openai
-    # LLM_MODEL=gpt-4o
-    # OPENAI_API_KEY=sk-your-openai-key
+    EDITOR_LLM_PROVIDER=openai
+    EDITOR_LLM_MODEL=gpt-4o
 
-    # Force vision on/off for providers that support it
-    # LLM_SUPPORTS_VISION=true
+    CRITIC_LLM_PROVIDER=openai
+    CRITIC_LLM_MODEL=gpt-4o
+
+    PLAYWRIGHT_BROWSERS_PATH="PATH_TO_PLAYWRIGHT_BROWSERS"
+    PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="PATH_TO_PLAYWRIGHT_CHROMIUM_EXECUTABLE"
     ```
+    
 
 ## Usage
 
@@ -64,4 +59,4 @@ This project implements an AI agent system capable of generating high-quality pr
 
 *   `src/agents`: Editor and Critic agent implementations.
 *   `src/utils`: Utilities for LLM communication and Slidev execution.
-*   `output`: Generated slides and history.
+*   `outputs`: Generated slides and history.

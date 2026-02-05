@@ -87,8 +87,8 @@ class LLMClient:
         """Calculate context cost based on token usage."""
         if not usage:
             return 0.0
-        input_cost = usage.get("prompt_tokens", 0) * 0.000005
-        output_cost = usage.get("completion_tokens", 0) * 0.000015
+        input_cost = usage.get("prompt_tokens", 0) * 0.0000025
+        output_cost = usage.get("completion_tokens", 0) * 0.00001
         return input_cost + output_cost
 
     @staticmethod
