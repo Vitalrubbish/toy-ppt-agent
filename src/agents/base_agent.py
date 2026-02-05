@@ -28,6 +28,13 @@ class BaseAgent:
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
 
+        # Previous conversation history
+        for item in self.history:
+            if "user" in item:
+                messages.append({"role": "user", "content": item["user"]})
+            if "assistant" in item:
+                messages.append({"role": "assistant", "content": item["assistant"]})
+
         if image_paths and self.llm_client.supports_vision():
             content: List[Dict[str, Any]] = [{"type": "text", "text": user_content}]
             for path in image_paths:

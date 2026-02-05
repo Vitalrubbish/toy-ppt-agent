@@ -114,7 +114,7 @@ class EditorAgent(BaseAgent):
     def __init__(self, model_name: str = "gpt-5.1", provider: str | None = None):
         provider = provider or os.getenv("EDITOR_LLM_PROVIDER") or "deepseek"
         super().__init__(role="Editor", model_name=model_name, provider=provider)
-        mode = os.getenv("MODE") or mode or "dual"
+        mode = os.getenv("MODE") or "dual"
         self.set_system_prompt(EDITOR_SYSTEM_PROMPT_DUAL if mode == "dual" else EDITOR_SYSTEM_PROMPT_SINGLE)
 
     def generate_outline(self, raw_content: str) -> str:
