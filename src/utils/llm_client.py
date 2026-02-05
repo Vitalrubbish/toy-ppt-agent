@@ -132,7 +132,7 @@ class LLMClient:
                         except Exception:
                             content = ""
 
-                    usage = response.usage.model_dump() if hasattr(response, "usage") else None
+                    usage = response.usage.model_dump() if response.usage else None
 
                     print(f"Deep Reasoning Time: {time.time() - start_dr:.2f}s")
                     return LLMResponse(content=content, usage=usage)
@@ -159,13 +159,8 @@ class LLMClient:
     
     # Context Cost Calculation
     @staticmethod
-    def calculate_context_cost(usage: Dict[str, Any]) -> float:
-        """Calculate context cost based on token usage."""
-        if not usage:
-            return 0.0
-        input_cost = usage.get("prompt_tokens", 0) * 0.00000125
-        output_cost = usage.get("completion_tokens", 0) * 0.00001
-        return input_cost + output_cost
+    def calculate_context_cost(input_tokens: int = 0, output_tokens: int = 0) -> float:
+        return input_tokens * 0.00000125 + output_tokens * 0.00001
 
     @staticmethod
     def encode_image(image_path: str) -> str:
