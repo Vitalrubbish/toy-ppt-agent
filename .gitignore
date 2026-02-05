@@ -5,9 +5,8 @@ __pycache__/
 venv/
 .venv/
 .env
-docs.zip
-package.json
 package-lock.json
+oooold_package-lock.json
 
 # Node
 node_modules/
@@ -25,6 +24,5 @@ error.txt
 .DS_Store
 Thumbs.db
 
-oooold_package-lock.json
 
 草稿/

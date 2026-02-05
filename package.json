@@ -1,0 +1,16 @@
+{
+  "name": "toy-ppt-agent",
+  "version": "1.0.0",
+  "description": "AI-Powered Slide Generator",
+  "dependencies": {
+    "@slidev/cli": "^0.48.0",
+    "@slidev/theme-default": "^0.25.0"
+  },
+  "scripts": {
+    "setup": "npm install", 
+    "install-browsers": "npx playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.58.1" 
+  }
+}
