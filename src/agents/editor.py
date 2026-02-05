@@ -3,6 +3,8 @@ import os
 from typing import Dict, List
 
 from agents.base_agent import BaseAgent
+from utils.llm_client import LLMClient
+
 
 
 EDITOR_SYSTEM_PROMPT = """
@@ -89,3 +91,31 @@ class EditorAgent(BaseAgent):
         )
         response = self.chat(prompt)
         return response.content.strip()
+    
+    def self_review(self, image_paths: List[str], slides_md: str | None = None) -> List[Dict]:
+        if image_paths and self.llm_client.supports_vision():
+            prompt = "Review the slides and provide feedback in JSON format."
+            response = self.chat(prompt, image_paths=image_paths, json_mode=True)
+        else:
+            prompt = (
+                "Review the slide markdown and provide feedback in JSON format. "
+                "Focus on clarity, structure, and potential layout issues.\n\n"
+            )
+            if slides_md:
+                prompt += f"Slides Markdown:\n{slides_md}\n"
+            response = self.chat(prompt, json_mode=True)
+        payload = LLMClient.safe_json_loads(response.content)
+        if isinstance(payload, dict) and "feedback" in payload:
+            return payload.get("feedback", [])
+        if isinstance(payload, list):
+            return payload
+        try:
+            parsed = json.loads(response.content)
+            if isinstance(parsed, dict) and "feedback" in parsed:
+                return parsed.get("feedback", [])
+            if isinstance(parsed, list):
+                return parsed
+        except json.JSONDecodeError:
+            return []
+        return []
+

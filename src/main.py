@@ -51,9 +51,10 @@ def is_approved(feedback: List[dict]) -> bool:
 @app.command()
 def run(
     input_path: str = "data/paper_summary.txt",
-    output_dir: str = "output",
+    output_dir: str = "outputs",
     max_iterations: int = 5,
     model_name: str = "gpt-4o",
+    mode: str = typer.Option("single", help="Mode: 'dual' (Editor+Critic) or 'single' (Editor self-review)"),
 ):
     """Run the PPT-Agent pipeline."""
     load_dotenv()
@@ -84,13 +85,21 @@ def run(
             exit(1)
 
     editor = EditorAgent(model_name=editor_model, provider=editor_provider)
-    critic = CriticAgent(model_name=critic_model, provider=critic_provider)
+    critic = None
+    if mode == "dual":
+        critic = CriticAgent(model_name=critic_model, provider=critic_provider)
     runner = SlidevRunner(work_dir=str(Path(__file__).resolve().parents[1]))
+
+    if mode == "dual":
+        output_dir = os.path.join(output_dir, "dual_output")
+    else:
+        output_dir = os.path.join(output_dir, "single_output")
 
     current_dir = os.path.join(output_dir, "current")
     history_dir = os.path.join(output_dir, "history")
     logs_dir = os.path.join(output_dir, "logs")
     images_dir = os.path.join(current_dir, "images")
+    
     ensure_dir(current_dir)
     ensure_dir(history_dir)
     ensure_dir(logs_dir)
@@ -186,12 +195,21 @@ def run(
             write_text_file(slides_path, slides_md)
             append_run_log(f"Rendered {len(image_paths)} slide images")
 
-            append_run_log("Critic: reviewing slides")
-            feedback = critic.review(image_paths, slides_md=slides_md)
-            critic_log_path = os.path.join(logs_dir, f"iter_{iteration}_critic.txt")
-            critic_output = critic.last_response or json.dumps(feedback, ensure_ascii=False, indent=2)
-            write_text_file(critic_log_path, critic_output)
-            append_run_log(f"Critic output saved to {critic_log_path}")
+            if mode == "dual":
+                append_run_log("Critic: reviewing slides")
+                feedback = critic.review(image_paths, slides_md=slides_md)
+                critic_log_path = os.path.join(logs_dir, f"iter_{iteration}_critic.txt")
+                critic_output = critic.last_response or json.dumps(feedback, ensure_ascii=False, indent=2)
+                write_text_file(critic_log_path, critic_output)
+                append_run_log(f"Critic output saved to {critic_log_path}")
+            else:
+                append_run_log("Editor: self-reviewing slides")
+                feedback = editor.self_review(image_paths, slides_md=slides_md)
+                critic_log_path = os.path.join(logs_dir, f"iter_{iteration}_critic.txt")
+                critic_output = editor.last_response or json.dumps(feedback, ensure_ascii=False, indent=2)
+                write_text_file(critic_log_path, critic_output)
+                append_run_log(f"Self-review output saved to {critic_log_path}")
+
 
         iter_dir = os.path.join(history_dir, f"iter_{iteration}")
         ensure_dir(iter_dir)

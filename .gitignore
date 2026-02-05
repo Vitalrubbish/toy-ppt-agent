@@ -17,10 +17,14 @@ node_modules/
 .playwright-browsers/
 
 # Logs and Output
-output/
+outputs/
 *.log
 error.txt
 
 # OS
 .DS_Store
 Thumbs.db
+
+oooold_package-lock.json
+
+草稿/
